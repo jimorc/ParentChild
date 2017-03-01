@@ -1,0 +1,83 @@
+// ParentChildGrandChild.cpp : Defines the entry point for the console application.
+//
+
+#include <algorithm>
+#include "BaseDerived.h"
+
+void Base::addChild(std::weak_ptr<Base> pParent, std::shared_ptr<Base> pChild)
+{
+    auto sParent = pParent.lock();
+    if (sParent) {
+        if (sParent == pChild) { return; }
+    }
+    if (auto pChildsParent = pChild->m_pParent.lock()) {
+        pChildsParent->removeChild(pChild);
+    }
+    sParent->m_children.push_back(pChild);
+    pChild->setParent(pParent);
+}
+
+std::shared_ptr<Base>  Base::removeChild(ID id) {
+    Base child(id);
+    auto iter = std::find_if(m_children.begin(), m_children.end(),
+        [&child](const auto& ch) ->bool { return child == *ch; });
+    if (iter != m_children.end()) {
+        auto rChild = *iter;
+        m_children.erase(iter);
+        rChild->clearParent();
+        return rChild;
+    }
+    else {
+        return std::shared_ptr<Base>(nullptr);
+    }
+}
+
+std::shared_ptr<Base> Base::findChild(ID id)
+{
+	Base child(id);
+	auto iter = std::find_if(m_children.begin(), m_children.end(),
+		[&child](const auto& ch) ->bool { return child == *ch; });
+	if(iter != m_children.end()) {
+		return *iter;
+	}
+	else {
+		return std::shared_ptr<Base>(nullptr);
+	}
+}
+
+void Base::clearParent()
+{
+    if (auto pParent = m_pParent.lock()) {
+        pParent->removeChild(m_id);
+    }
+    setParent(std::weak_ptr<Base>());
+}
+
+int main()
+{
+    std::shared_ptr<A> pA1 = std::make_shared<A>(e1);
+    std::shared_ptr<B> pB1 = std::make_shared<B>(e2);
+    std::shared_ptr<B> pB2 = std::make_shared<B>(e3);
+    std::shared_ptr<C> pC1 = std::make_shared<C>(e4);
+    std::shared_ptr<C> pC2 = std::make_shared<C>(e5);
+    std::weak_ptr<A> wA1 = pA1;
+    std::weak_ptr<B> wB1 = pB1;
+    A::addChild( wA1, pB1);
+    A::addChild(wA1, pB2);
+    B::addChild(wB1, pC1);
+    B::addChild(wB1, pC2);
+    std::cout << *pA1;
+
+    std::shared_ptr<B> pB3 = std::dynamic_pointer_cast<B>(pA1->removeChild(e3));
+    std::weak_ptr<C> wC2 = pC2;
+    C::addChild(wC2, pB3);
+    std::cout << '\n' << *pA1;
+
+	std::shared_ptr<B> pB4 = std::dynamic_pointer_cast<B>(pA1->findChild(e2));
+	std::cout << "\npB4: " << *pB4;
+	std::cout << "\npA1 after findChild: " << *pA1;
+
+    std::cout << "\nPress any non-whitespace character key and then the Enter key to terminate:" << std::endl;
+    char c;
+    std::cin >> c;
+}
