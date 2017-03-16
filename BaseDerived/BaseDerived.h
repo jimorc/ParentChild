@@ -19,8 +19,7 @@ public:
     virtual ~Base() {}
     static void addChild(std::weak_ptr<Base> parent, std::shared_ptr<Base> child);
     std::shared_ptr<Base>  Base::removeChild(ID id);
-    template<typename T>
-    std::shared_ptr<Base> removeChild(std::shared_ptr<T>& pChild)
+    std::shared_ptr<Base> removeChild(std::shared_ptr<Base>& pChild)
     {
         return removeChild(pChild->getID());
     }
