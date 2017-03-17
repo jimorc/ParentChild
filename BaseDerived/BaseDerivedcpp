@@ -28,7 +28,7 @@ std::shared_ptr<Base>  Base::removeChild(ID id) {
         return rChild;
     }
     else {
-        return std::shared_ptr<Base>(nullptr);
+        return std::shared_ptr<Base>();
     }
 }
 
@@ -41,7 +41,7 @@ std::shared_ptr<Base> Base::findChild(ID id)
 		return *iter;
 	}
 	else {
-		return std::shared_ptr<Base>(nullptr);
+		return std::shared_ptr<Base>();
 	}
 }
 
@@ -68,12 +68,12 @@ int main()
     B::addChild(wB1, pC2);
     std::cout << *pA1;
 
-    std::shared_ptr<B> pB3 = std::dynamic_pointer_cast<B>(pA1->removeChild(e3));
+    std::shared_ptr<Base> pB3 = pA1->removeChild(e3);
     std::weak_ptr<C> wC2 = pC2;
     C::addChild(wC2, pB3);
     std::cout << '\n' << *pA1;
 
-	std::shared_ptr<B> pB4 = std::dynamic_pointer_cast<B>(pA1->findChild(e2));
+	std::shared_ptr<Base> pB4 = pA1->findChild(e2);
 	std::cout << "\npB4: " << *pB4;
 	std::cout << "\npA1 after findChild: " << *pA1;
 
